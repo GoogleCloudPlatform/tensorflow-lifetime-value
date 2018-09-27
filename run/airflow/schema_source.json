@@ -1,0 +1,57 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "chain",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "dept",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "category",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "company",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "brand",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "date",
+    "type": "DATE"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "productsize",
+    "type": "FLOAT"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "productmeasure",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "purchasequantity",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "purchaseamount",
+    "type": "FLOAT"
+  }
+]

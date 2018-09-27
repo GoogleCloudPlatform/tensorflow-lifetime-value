@@ -1,0 +1,2 @@
+{"customer_id":"abc", "monetary": 1000.0, "recency": 20.0, "frequency": 3.0, "avg_basket_value": 250.0, "avg_basket_size": 5.0, "date_range": 250, "cnt_orders": 15, "cnt_returns": 1, "has_returned": 1}
+{"customer_id":"cde", "monetary": 500.0, "recency": 20.0, "frequency": 3.0, "avg_basket_value": 250.0, "avg_basket_size": 5.0, "date_range": 250, "cnt_orders": 15, "cnt_returns": 1, "has_returned": 1}

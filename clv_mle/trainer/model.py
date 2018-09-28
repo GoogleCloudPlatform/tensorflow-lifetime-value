@@ -136,7 +136,7 @@ def dnn_model(features, mode, params):
     output tensor
   """
   # Make features
-  feature_columns = make_features()
+  feature_columns = clvf.get_deep_features()
 
   # Creates the input layers from the features.
   h = tf.feature_column.input_layer(features=features,
@@ -144,9 +144,13 @@ def dnn_model(features, mode, params):
 
   # Loops through the layers.
   for size in params.hidden_units:
-      h = tf.layers.dense(h, size, activation=tf.nn.relu)
+    h = tf.layers.dense(h, size, activation=None)
+    h = tf.layers.batch_normalization(h, training=(
+        mode == tf.estimator.ModeKeys.TRAIN))
+    h = tf.nn.relu(h)
+    if (params.dropout is not None) and (mode == tf.estimator.ModeKeys.TRAIN):
+      h = tf.layers.dropout(h, params.dropout)
 
-  # Creates the logit layer
   logits = tf.layers.dense(h, 1, activation=None)
   return logits
 
@@ -169,37 +173,35 @@ def model_fn(features, labels, mode, params):
   output = tf.squeeze(logits)
 
   # Returns an estimator spec for PREDICT.
-  # Get the output layer (logits) from the chosen model defined in MODEL_TYPE.
-  logits = eval(MODEL_TYPE)(features, mode, params)
-
-  # Reshape output layer to 1-dim Tensor to return predictions
-  output = tf.squeeze(logits)
-
-  # Returns an estimator spec for PREDICT.
   if mode == tf.estimator.ModeKeys.PREDICT:
-      predictions = {
-          'scores': output
-      }
-      export_outputs = {
-          'predictions': tf.estimator.export.PredictOutput(predictions)
-      }
+    predictions = {
+        'customer_id': tf.squeeze(features[clvf.get_key()]),
+        'predicted_monetary': output
+    }
+    export_outputs = {
+        'predictions': tf.estimator.export.PredictOutput(predictions)
+    }
 
-      return tf.estimator.EstimatorSpec(mode=mode,
-                                        predictions=predictions,
-                                        export_outputs=export_outputs)
+    return tf.estimator.EstimatorSpec(mode=mode,
+                                      predictions=predictions,
+                                      export_outputs=export_outputs)
 
-
-  # Calculates loss using mean squared error between the given labels and the calculated output.
+  # Calculates loss using mean squared error between the given labels
+  # and the calculated output.
   loss = tf.losses.mean_squared_error(labels, output)
 
-  # Creates Optimizer and its minimizing function (train operation).
-  optimizer = tf.train.AdamOptimizer()
-  train_op = optimizer.minimize(loss=loss,
-                                global_step=tf.train.get_global_step())
+  # Create Optimizer and thhe train operation
+  optimizer = get_optimizer(params)
+
+  # add update ops for batch norm stats
+  update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+  with tf.control_dependencies(update_ops):
+    train_op = optimizer.minimize(loss=loss,
+                                  global_step=tf.train.get_global_step())
 
   # Root mean square error eval metric
   eval_metric_ops = {
-      "rmse": tf.metrics.root_mean_squared_error(labels, output)
+      'rmse': tf.metrics.root_mean_squared_error(labels, output)
   }
 
   # Returns an estimator spec for EVAL and TRAIN modes.
@@ -207,3 +209,110 @@ def model_fn(features, labels, mode, params):
                                     loss=loss,
                                     train_op=train_op,
                                     eval_metric_ops=eval_metric_ops)
+
+
+def rmse_evaluator(labels, predictions):
+  """Metric for RMSE.
+
+  Args:
+    labels: Truth provided by the estimator when adding the metric
+    predictions: Predicted values. Provided by the estimator silently
+  Returns:
+    metric_fn that can be used to add the metrics to an existing Estimator
+  """
+  pred_values = predictions['predictions']
+  return {'rmse': tf.metrics.root_mean_squared_error(labels, pred_values)}
+
+
+def get_learning_rate(params):
+  """Get learning rate given hyperparams.
+
+  Args:
+    params: hyperparameters
+
+  Returns:
+    learning_rate tensor if params.learning_rate_decay,
+    else a constant.
+  """
+  if params.learning_rate_decay:
+    global_step = tf.train.get_global_step()
+    learning_rate = tf.train.exponential_decay(
+        learning_rate=params.learning_rate,
+        global_step=global_step,
+        decay_steps=params.checkpoint_steps,
+        decay_rate=0.7,
+        staircase=True
+    )
+  else:
+    learning_rate = params.learning_rate
+  return learning_rate
+
+
+def get_optimizer(params):
+  """Get optimizer given hyperparams.
+
+  Args:
+    params: hyperparameters
+
+  Returns:
+    optimizer object
+
+  Raises:
+    ValueError: if params.optimizer is not supported.
+  """
+  if params.optimizer == 'ProximalAdagrad':
+    optimizer = tf.train.ProximalAdagradOptimizer(
+        learning_rate=get_learning_rate(params),
+        l1_regularization_strength=params.l1_regularization,
+        l2_regularization_strength=params.l2_regularization
+    )
+  elif params.optimizer == 'SGD':
+    optimizer = tf.train.GradientDescentOptimizer(get_learning_rate(params))
+  elif params.optimizer == 'Adam':
+    optimizer = tf.train.AdamOptimizer(learning_rate=get_learning_rate(params))
+  elif params.optimizer == 'RMSProp':
+    optimizer = tf.train.RMSPropOptimizer(
+        learning_rate=get_learning_rate(params))
+  else:
+    raise ValueError('Invalid optimizer: %s' % params.optimizer)
+  return optimizer
+
+
+def get_estimator(estimator_name, config, params, model_dir):
+  """Return one of the TF-provided canned estimators defined by MODEL_TYPE.
+
+  Args:
+    estimator_name:     estimator model type
+    config:             run config
+    params:             hyperparams
+    model_dir:          model directory
+
+  Returns:
+    Estimator object
+  """
+  print('-- Running training with estimator {} --'.format(estimator_name))
+
+  if estimator_name not in CANNED_MODEL_TYPES:
+    estimator = tf.estimator.Estimator(model_fn=model_fn,
+                                       config=config,
+                                       params=params,
+                                       model_dir=model_dir)
+  else:
+    if estimator_name == CANNED_DEEP:
+      estimator = tf.estimator.DNNRegressor(
+          feature_columns=clvf.get_deep_features(),
+          hidden_units=params.hidden_units,
+          config=config,
+          model_dir=model_dir,
+          optimizer=lambda: get_optimizer(params),
+          batch_norm=True,
+          dropout=params.dropout)
+    else:
+      estimator = tf.estimator.LinearRegressor(
+          feature_columns=clvf.get_wide_features(),
+          config=config,
+          model_dir=model_dir)
+
+    # Add RMSE for metric for canned estimators
+    estimator = tf.contrib.estimator.add_metrics(estimator, rmse_evaluator)
+  return estimator

@@ -1,0 +1,8 @@
+*pyc
+data/*
+jobs/*
+trained/*
+.DS_Store
+images/
+nul
+.ipynb_checkpoints

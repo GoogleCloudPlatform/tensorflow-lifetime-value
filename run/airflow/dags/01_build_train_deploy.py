@@ -188,7 +188,7 @@ def do_train_model(**kwargs):
         package_uris=['gs://{}/code/{}'.format(COMPOSER_BUCKET_NAME, MODEL_PACKAGE_NAME)],
         training_python_module='trainer.task',
         region=REGION,
-        training_args=['--job-dir', 'gs://{}/{}'.format(COMPOSER_BUCKET_NAME, PREFIX_JOBS_EXPORT),
+        training_args=['--job-dir', 'gs://{}/{}/{}'.format(COMPOSER_BUCKET_NAME, PREFIX_JOBS_EXPORT, job_id),
                        '--data-src', 'gs://{}'.format(LOCATION_TRAINING_DATA),
                        '--model_type', kwargs['dag_run'].conf.get('model_type')],
         dag=dag

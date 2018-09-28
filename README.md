@@ -1,7 +1,44 @@
+## Install
+
+### install Miniconda
+
+    sudo apt-get install -y git bzip2
+    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+    bash Miniconda2-latest-Linux-x86_64.sh -b
+    export PATH=~/miniconda2/bin:$PATH
+
+### create environment
+
+    conda create -n clv
+    conda activate clv
+    conda install -n clv python pip
+    pip install -r requirements.txt
+
+### launch jupyter
+If you are interested in using Jupyter with Datalab, you can do the following:
+
+```
+jupyter nbextension install --py datalab.notebook --sys-prefix
+jupyter notebook
+```
+
+And enter in the first cell of your Notebook
+
+```
+%load_ext google.datalab.kernel
+```
+
+### Copying the code
+
+```
+git clone && cd
+```
+
+
 ## Automation
 This code is set to run automatically using Cloud Composer, a google-managed version of Airflow. The following steps describe how to go from your own copy of the data to a deployed model with results exported both in Datastore and BigQuery.
 
-See this [solution]() for more details.
+See this solution for more details.
 
 ### Setup
 Before running the Airflow script, you need a couple of things to be set up:
@@ -10,12 +47,12 @@ Before running the Airflow script, you need a couple of things to be set up:
 
 ```
 export PROJECT=$(gcloud config get-value project 2> /dev/null)
-export BUCKET=gs://${PROJECT}_data
+export BUCKET=gs://${PROJECT}_data_final
 export REGION=us-central1
 export DATASET_NAME=ltv
 
-export COMPOSER_NAME="flower"
-export COMPOSER_BUCKET_NAME=${PROJECT}_composer
+export COMPOSER_NAME="clv-final"
+export COMPOSER_BUCKET_NAME=${PROJECT}_composer_final
 export COMPOSER_BUCKET=gs://${COMPOSER_BUCKET_NAME}
 export DF_STAGING=${COMPOSER_BUCKET}/dataflow_staging
 export DF_ZONE=${REGION}-a
@@ -254,6 +291,29 @@ trigger_dag \
 -- \
 predict_serve \
 --conf '{"model_name":"dnn_airflow", "model_version":"v1", "dataset":"ltv"}'
+```
+
+## Train and Tune Models
+To run training or hypertuning you can use the mltrain.sh script.  It must be run from the top level directory, as in the examples below. For ML Engine jobs you must supply a bucket on GCS.  The job data folder will be gs://bucket/data and the job directory will be gs://bucket/jobs. So your data files must already be in gs://bucket/data.  For DNN models the data should be named 'train.csv' and 'eval.csv', for probablistic models the file must be 'features_n_target.csv'.
+
+For example:
+
+```
+run/mltrain.sh local data
+```
+
+```
+run/mltrain.sh train ${COMPOSER_BUCKET}
+```
+
+```
+run/mltrain.sh tune gs://your-bucket
+```
+
+For probablistic models:
+
+```
+run/mltrain.sh local data --model_type paretonbd_model --threshold_date 2013-01-31 --predict_end 2013-07-31
 ```
 
 ### Disclaimer: This is not an official Google product

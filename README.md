@@ -1,3 +1,9 @@
+# Customer Lifetime Value Prediction with TensorFlow
+
+This project shows how to use a TensorFlow model to predict customer lifetime value.  The model used is a DNN with batch normalization and dropout. We test the model using [this data set](https://www.kaggle.com/c/acquire-valued-shoppers-challenge) from Kaggle.  We also provide an implementation, using the [Lifetimes library](https://github.com/CamDavidsonPilon/lifetimes) in Python, of [probablistic models](https://rdrr.io/cran/BTYD/) commonly used in industry to perform lifetime value prediction.
+
+The project also shows how to deploy a production-ready data processing pipeline for lifetime value prediction on Google Cloud Platform, using BigQuery and DataStore with orchestration provided by Cloud Composer.
+
 ## Install
 
 ### install Miniconda
@@ -26,12 +32,6 @@ And enter in the first cell of your Notebook
 
 ```
 %load_ext google.datalab.kernel
-```
-
-### Copying the code
-
-```
-git clone && cd
 ```
 
 
@@ -74,18 +74,18 @@ Create a datastore database as detailed in the [Datastore documentation](https:/
 3 - Copying useful data
 
 ```
-# Copies the raw dataset.
+# Copy the raw dataset
 gsutil cp gs://solutions-public-assets/ml-clv/db_dump.csv ${BUCKET}
 gsutil cp ${BUCKET}/db_dump.csv ${COMPOSER_BUCKET}
 
-# Copies the dataset to be predicted. Replace with your own.
+# Copy the dataset to be predicted. Replace with your own.
 gsutil cp clv_mle/to_predict.json ${BUCKET}/predictions/
 gsutil cp ${BUCKET}/predictions/to_predict.json ${COMPOSER_BUCKET}/predictions/
 
 ```
 
 3 - [Optional] Create Machine Learning Engine packaged file
-If you changed any of the Python files in clv_mle, you need to recreate the packaged files usable by ML Engine.
+If you make changes to any of the Python files in clv_mle, you need to recreate the packaged files usable by ML Engine.
 
 ```
 cd ${LOCAL_FOLDER}/clv_mle
@@ -104,7 +104,7 @@ Dataflow API
 
 
 
-#### Creates a service account
+#### Create a service account
 Creating a service account is important to make sure that your Cloud Composer instance can perform the required tasks within BigQuery, ML Engine, Dataflow, Cloud Storage and Datastore.
 
 The following creates a service account called composer@[YOUR-PROJECT-ID].iam.gserviceaccount.com. and assigns the required roles to the service account.

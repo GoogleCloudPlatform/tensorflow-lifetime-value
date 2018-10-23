@@ -29,7 +29,7 @@ from model import PARETO, BGNBD
 PENALIZER_COEF = 0.01
 DISCOUNT_RATE = 0.01
 
-FEATURES_N_TARGET_FILE = 'features_n_target.csv'
+TRAINING_DATA_FILE = 'btyd.csv'
 OUTPUT_FILE = 'predictions.csv'
 
 
@@ -46,7 +46,7 @@ def load_data(datapath):
   # library as it wouldn't scale as well. The pre-processing done in BQ instead.
   tf.logging.info('Loading data...')
 
-  ft_file = '{0}/{1}'.format(datapath, FEATURES_N_TARGET_FILE)
+  ft_file = '{0}/{1}'.format(datapath, TRAINING_DATA_FILE)
   df_ft = pd.read_csv(ft_file)
 
   # Extracts relevant dataframes for RFM:

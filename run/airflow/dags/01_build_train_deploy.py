@@ -169,7 +169,7 @@ t5c = bigquery_to_gcs.BigQueryToCloudStorageOperator(
     task_id='bq_btyd_to_gcs',
     source_project_dataset_table="{}.{}.{}".format(PROJECT, DATASET, 'features_n_target'),
     destination_cloud_storage_uris=data_btyd_location,
-    print_header=False,
+    print_header=True,
     dag=dag
 )
 

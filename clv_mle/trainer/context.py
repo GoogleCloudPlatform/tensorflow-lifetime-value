@@ -15,7 +15,7 @@
 """Feature definition and processing."""
 
 from tensorflow import feature_column as tfc
-
+from six import iteritems
 
 class CLVFeatures(object):
   """Encapulates the features for Estimator models."""
@@ -92,11 +92,11 @@ class CLVFeatures(object):
     """
     headers = [h for h in self.HEADERS if h not in self.UNUSED]
     numerics_names = {
-        k: v for k, v in self.NUMERICS.iteritems()
+        k: v for k, v in iteritems(self.NUMERICS)
         if (k not in self.UNUSED) and (k != self.TARGET_NAME)
     }
     categoricals_names = {
-        k: v for k, v in self.CATEGORICALS_W_LIST.iteritems()
+        k: v for k, v in iteritems(self.CATEGORICALS_W_LIST)
         if k not in self.UNUSED
     }
 

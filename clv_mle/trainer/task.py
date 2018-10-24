@@ -16,6 +16,7 @@
 
 from __future__ import division
 from __future__ import print_function
+from __future__ import absolute_import
 
 import sys
 
@@ -25,10 +26,10 @@ import os
 import shutil
 import tensorflow as tf
 
-from btyd import run_btyd
-from context import CLVFeatures
-from model import get_estimator, read_train, read_eval
-from model import MODEL_TYPE, MODEL_TYPES, PROBABILISTIC_MODEL_TYPES
+from clv_mle.trainer import btyd
+from clv_mle.trainer.context import CLVFeatures
+from clv_mle.trainer.model import get_estimator, read_train, read_eval
+from clv_mle.trainer.model import MODEL_TYPE, MODEL_TYPES, PROBABILISTIC_MODEL_TYPES
 
 # Training defaults
 
@@ -174,8 +175,8 @@ def main(argv=None):
 
   # execute non-estimator models
   if args.model_type in PROBABILISTIC_MODEL_TYPES:
-    run_btyd(args.model_type, args.data_src, args.threshold_date,
-             args.predict_end)
+    btyd.run_btyd(args.model_type, args.data_src, args.threshold_date,
+                  args.predict_end)
     return
 
   if args.hypertune:

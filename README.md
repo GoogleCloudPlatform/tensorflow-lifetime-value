@@ -8,6 +8,8 @@ The project also shows how to deploy a production-ready data processing pipeline
 
 ### install Miniconda
 
+The code works with python 2/3.  Using Miniconda2:
+
     sudo apt-get install -y git bzip2
     wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
     bash Miniconda2-latest-Linux-x86_64.sh -b
@@ -16,7 +18,7 @@ The project also shows how to deploy a production-ready data processing pipeline
 ### create environment
 
     conda create -n clv
-    conda activate clv
+    source activate clv
     conda install -n clv python pip
     pip install -r requirements.txt
 
@@ -299,6 +301,7 @@ To run training or hypertuning you can use the mltrain.sh script.  It must be ru
 For example:
 
 ```
+gsutil -m cp -r ${COMPOSER_BUCKET}/data .
 run/mltrain.sh local data
 ```
 

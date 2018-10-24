@@ -15,6 +15,7 @@
 """Core functions for Probabilistic (BTYD) models."""
 
 from __future__ import print_function
+from __future__ import absolute_import
 
 from datetime import datetime
 from lifetimes import BetaGeoFitter, ParetoNBDFitter, GammaGammaFitter
@@ -24,7 +25,7 @@ import os
 import pandas as pd
 import tensorflow as tf
 
-from model import PARETO, BGNBD
+from clv_mle.trainer.model import PARETO, BGNBD
 
 PENALIZER_COEF = 0.01
 DISCOUNT_RATE = 0.01

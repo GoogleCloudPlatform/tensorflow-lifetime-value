@@ -26,24 +26,24 @@ import os
 import shutil
 import tensorflow as tf
 
-from clv_mle.trainer import btyd
-from clv_mle.trainer.context import CLVFeatures
-from clv_mle.trainer.model import get_estimator, read_train, read_eval, read_test
-from clv_mle.trainer.model import MODEL_TYPE, MODEL_TYPES, PROBABILISTIC_MODEL_TYPES
+from .btyd import run_btyd
+from .context import CLVFeatures
+from .model import get_estimator, read_train, read_eval, read_test
+from .model import MODEL_TYPE, MODEL_TYPES, PROBABILISTIC_MODEL_TYPES
 
 # Training defaults
 
 # 100000 is the approximate size of our training set (to nearest 1000).
 TRAIN_SIZE = 100000
-NUM_EPOCHS = 100
+NUM_EPOCHS = 70
 BATCH_SIZE = 20
 NUM_EVAL = 20
 
 HIDDEN_UNITS = '128 64 32 16'
-LEARNING_RATE = 0.08927
-L1_REGULARIZATION = 0.0696
-L2_REGULARIZATION = 0.0755
-DROPOUT = 0.8992
+LEARNING_RATE = 0.096505
+L1_REGULARIZATION = 0.0026019
+L2_REGULARIZATION = 0.0102146
+DROPOUT = 0.843251
 SHUFFLE_BUFFER_SIZE = 10000
 
 
@@ -175,8 +175,8 @@ def main(argv=None):
 
   # execute non-estimator models
   if args.model_type in PROBABILISTIC_MODEL_TYPES:
-    btyd.run_btyd(args.model_type, args.data_src, args.threshold_date,
-                  args.predict_end)
+    run_btyd(args.model_type, args.data_src, args.threshold_date,
+             args.predict_end)
     return
 
   if args.hypertune:

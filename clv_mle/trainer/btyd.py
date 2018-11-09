@@ -25,7 +25,7 @@ import os
 import pandas as pd
 import tensorflow as tf
 
-from clv_mle.trainer.model import PARETO, BGNBD
+from .model import PARETO, BGNBD
 
 PENALIZER_COEF = 0.01
 DISCOUNT_RATE = 0.01

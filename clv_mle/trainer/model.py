@@ -19,7 +19,7 @@ from __future__ import absolute_import
 
 import tensorflow as tf
 
-from clv_mle.trainer.context import CLVFeatures
+from .context import CLVFeatures
 
 # Possible estimators:
 # Canned: https://www.tensorflow.org/api_docs/python/tf/estimator or custom ones

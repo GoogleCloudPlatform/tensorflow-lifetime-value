@@ -23,9 +23,9 @@ run on ML Engine.
 
 For ML Engine jobs you must supply a bucket on GCS.  The job data
 folder will be gs://bucket/data and the job directory will be gs://bucket/jobs.
-So your data files must already be in gs://bucket/data.  For DNN models the data
-should be named 'train.csv' and 'eval.csv', for probablistic models the file
-must be 'features_n_target.csv'.
+So your data files must already be in gs://bucket/data.  For DNN models the
+data should be named 'train.csv', 'eval.csv' and 'test.csv, for probablistic
+models the file must be 'btyd.csv'.
 
 Examples:
 

@@ -296,7 +296,7 @@ predict_serve \
 ```
 
 ## Train and Tune Models
-To run training or hypertuning you can use the mltrain.sh script.  It must be run from the top level directory, as in the examples below. For ML Engine jobs you must supply a bucket on GCS.  The job data folder will be gs://bucket/data and the job directory will be gs://bucket/jobs. So your data files must already be in gs://bucket/data.  For DNN models the data should be named 'train.csv' and 'eval.csv', for probablistic models the file must be 'btyd.csv'.
+To run training or hypertuning you can use the mltrain.sh script.  It must be run from the top level directory, as in the examples below. For ML Engine jobs you must supply a bucket on GCS.  The job data folder will be gs://bucket/data and the job directory will be gs://bucket/jobs. So your data files must already be in gs://bucket/data.  If you use ${COMPOSER_BUCKET}, and the DAG has been run at least once, the data files will be present.  For DNN models the data should be named 'train.csv', 'eval.csv' and 'test.csv', for probablistic models the file must be 'btyd.csv'.
 
 For example:
 

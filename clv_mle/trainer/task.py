@@ -28,7 +28,7 @@ import tensorflow as tf
 
 from clv_mle.trainer import btyd
 from clv_mle.trainer.context import CLVFeatures
-from clv_mle.trainer.model import get_estimator, read_train, read_eval
+from clv_mle.trainer.model import get_estimator, read_train, read_eval, read_test
 from clv_mle.trainer.model import MODEL_TYPE, MODEL_TYPES, PROBABILISTIC_MODEL_TYPES
 
 # Training defaults
@@ -81,7 +81,7 @@ def create_parser():
   parser.add_argument('--learning_rate_decay',
                       type=str,
                       help='Use learning rate decay [True|False]',
-                      default='False')
+                      default='True')
   parser.add_argument('--train_size',
                       help='(Approximate) size of training set',
                       default=TRAIN_SIZE,
@@ -275,6 +275,9 @@ def main(argv=None):
   # Runs the training and evaluation using the chosen estimator.
   # Saves model data into export/estimate/1234567890/...
   tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
+
+  # Evaluate the test set for final metrics
+  estimator.evaluate(lambda: read_test(data_folder, params), name="Test Set")
 
 if __name__ == '__main__':
   main()

@@ -18,5 +18,5 @@ FROM
   `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.features_n_target`
 WHERE
   -- TRAIN
-  MOD(ABS(FARM_FINGERPRINT(CAST(customer_id AS STRING))), 100000) > 70000 AND
-  MOD(ABS(FARM_FINGERPRINT(CAST(customer_id AS STRING))), 100000) < 85000
+  MOD(ABS(FARM_FINGERPRINT(CAST(customer_id AS STRING))), 100000) > 85000 AND
+  MOD(ABS(FARM_FINGERPRINT(CAST(customer_id AS STRING))), 100000) < 100000

@@ -143,11 +143,25 @@ t4b = bigquery_operator.BigQueryOperator(
     dag=dag
 )
 
+t4c = bigquery_operator.BigQueryOperator(
+    task_id='bq_dnn_test',
+    bql='{}/dnn/split_test.sql'.format(GCS_SQL),
+    use_legacy_sql=False,
+    allow_large_results=True,
+    destination_dataset_table="{}.{}.{}".format(PROJECT,
+                                                DATASET,
+                                                'dnn_test'),
+    create_disposition="CREATE_IF_NEEDED",
+    write_disposition="WRITE_TRUNCATE",
+    dag=dag
+)
+
 # TODO: Currently all data steps are done whether BTYD or DNN are used. It would
 # be better to have a condition to call only one task or the other using 'model_type'
 data_btyd_location = ['gs://{}/{}'.format(LOCATION_TRAINING_DATA, 'btyd.csv')]
 data_train_locations = ['gs://{}/{}'.format(LOCATION_TRAINING_DATA, 'train.csv')]
 data_eval_locations = ['gs://{}/{}'.format(LOCATION_TRAINING_DATA, 'eval.csv')]
+data_test_locations = ['gs://{}/{}'.format(LOCATION_TRAINING_DATA, 'test.csv')]
 
 t5a = bigquery_to_gcs.BigQueryToCloudStorageOperator(
     task_id='bq_dnn_train_to_gcs',
@@ -166,6 +180,14 @@ t5b = bigquery_to_gcs.BigQueryToCloudStorageOperator(
 )
 
 t5c = bigquery_to_gcs.BigQueryToCloudStorageOperator(
+    task_id='bq_dnn_test_to_gcs',
+    source_project_dataset_table="{}.{}.{}".format(PROJECT, DATASET, 'dnn_test'),
+    destination_cloud_storage_uris=data_test_locations,
+    print_header=False,
+    dag=dag
+)
+
+t5d = bigquery_to_gcs.BigQueryToCloudStorageOperator(
     task_id='bq_btyd_to_gcs',
     source_project_dataset_table="{}.{}.{}".format(PROJECT, DATASET, 'features_n_target'),
     destination_cloud_storage_uris=data_btyd_location,
@@ -339,11 +361,12 @@ t11 = PythonOperator(
 # How to link them
 t1.set_downstream(t2)
 t2.set_downstream(t3)
-t3.set_downstream([t4a, t4b])
-t3.set_downstream(t5c)
+t3.set_downstream([t4a, t4b, t4c])
+t3.set_downstream(t5d)
 t4a.set_downstream(t5a)
 t4b.set_downstream(t5b)
-t6.set_upstream([t5a, t5b, t5c])
+t4c.set_downstream(t5c)
+t6.set_upstream([t5a, t5b, t5c, t5d])
 t6.set_downstream(t7)
 t7.set_downstream(t8)
 t9.set_upstream(t8)

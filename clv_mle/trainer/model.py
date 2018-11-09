@@ -63,7 +63,7 @@ def parse_csv(csv_row):
   return features, target
 
 
-def dataset_input_fn(data_folder, prefix=None, mode=None, params=None):
+def dataset_input_fn(data_folder, prefix=None, mode=None, params=None, count=None):
   """Creates a dataset reading example from filenames.
 
   Args:
@@ -87,8 +87,8 @@ def dataset_input_fn(data_folder, prefix=None, mode=None, params=None):
   if shuffle:
     dataset = dataset.shuffle(buffer_size=params.buffer_size)
 
-  # Repeat the input indefinitely
-  dataset = dataset.repeat()
+  # Repeat the input indefinitely if count is None
+  dataset = dataset.repeat(count=count)
 
   # Generate batches
   dataset = dataset.batch(params.batch_size)
@@ -120,7 +120,10 @@ def read_eval(data_folder, params):
 
 def read_test(data_folder, params):
   """Returns a dataset for test."""
-  return dataset_input_fn(data_folder=data_folder, prefix='test', params=params)
+  return dataset_input_fn(data_folder=data_folder,
+                          prefix='test',
+                          params=params,
+                          count=1)
 
 #####################
 # Model Definitions #

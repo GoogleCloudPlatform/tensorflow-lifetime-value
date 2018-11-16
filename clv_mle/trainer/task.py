@@ -148,6 +148,7 @@ def csv_serving_input_fn():
   Returns:
     ServingInputReceiver for exporting model.
   """
+  #[START csv_serving_fn]
   clvf = CLVFeatures(ignore_crosses=True,
                      is_dnn=MODEL_TYPE not in PROBABILISTIC_MODEL_TYPES)
   used_headers = clvf.get_used_headers(with_key=True, with_target=False)
@@ -163,6 +164,7 @@ def csv_serving_input_fn():
   features = dict(zip(used_headers, columns))
 
   return tf.estimator.export.ServingInputReceiver(features, receiver_tensor)
+  #[END csv_serving_fn]
 
 
 def main(argv=None):

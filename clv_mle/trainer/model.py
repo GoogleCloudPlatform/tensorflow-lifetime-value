@@ -178,6 +178,9 @@ def model_fn(features, labels, mode, params):
 
   # Returns an estimator spec for PREDICT.
   if mode == tf.estimator.ModeKeys.PREDICT:
+    
+    #[START prediction_output_format]
+    prediction_output_format
     predictions = {
         'customer_id': tf.squeeze(features[clvf.get_key()]),
         'predicted_monetary': output
@@ -189,6 +192,7 @@ def model_fn(features, labels, mode, params):
     return tf.estimator.EstimatorSpec(mode=mode,
                                       predictions=predictions,
                                       export_outputs=export_outputs)
+    #[END prediction_output_format]
 
   # Calculates loss using mean squared error between the given labels
   # and the calculated output.

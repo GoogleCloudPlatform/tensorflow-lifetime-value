@@ -91,10 +91,11 @@ def paretonbd_model(summary):
   Returns:
     bgnbd model fit to the data
   """
+  #[START run_btyd]
   paretof = ParetoNBDFitter(penalizer_coef=PENALIZER_COEF)
   paretof.fit(summary['frequency'], summary['recency'], summary['T'])
   return paretof
-
+  #[END run_btyd]
 
 def run_btyd(model_type, data_src, threshold_date, predict_end):
   """Run selected BTYD model on data files located in args.data_src.

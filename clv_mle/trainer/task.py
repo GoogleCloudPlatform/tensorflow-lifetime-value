@@ -34,6 +34,7 @@ from .model import MODEL_TYPE, MODEL_TYPES, PROBABILISTIC_MODEL_TYPES
 # Training defaults
 
 # 100000 is the approximate size of our training set (to nearest 1000).
+#[START hyperparams]
 TRAIN_SIZE = 100000
 NUM_EPOCHS = 70
 BATCH_SIZE = 20
@@ -45,6 +46,7 @@ L1_REGULARIZATION = 0.0026019
 L2_REGULARIZATION = 0.0102146
 DROPOUT = 0.843251
 SHUFFLE_BUFFER_SIZE = 10000
+#[END hyperparams]
 
 
 def create_parser():
@@ -242,11 +244,12 @@ def main(argv=None):
   estimator = None
 
   # get model estimator
+  #[START choose_model]
   estimator = get_estimator(estimator_name=args.model_type,
                             config=config,
                             params=params,
                             model_dir=model_dir)
-
+  #[END choose_model]
   # Creates the training and eval specs by reading the relevant datasets
   # Note that TrainSpec needs max_steps otherwise it runs forever.
   train_spec = tf.estimator.TrainSpec(

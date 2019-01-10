@@ -13,17 +13,20 @@ The project also shows how to deploy a production-ready data processing pipeline
 
 The code works with python 2/3.  Using Miniconda2:
 
+    ```
     sudo apt-get install -y git bzip2
     wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
     bash Miniconda2-latest-Linux-x86_64.sh -b
     export PATH=~/miniconda2/bin:$PATH
+    ```
 
 ### create environment
 
-    conda create -n clv
+    ```
+    conda create -y -n clv
     source activate clv
-    conda install -n clv python pip
-    pip install -r requirements.txt
+    conda install -n clv --file requirements.txt
+    ```
 
 ### launch Jupyter
 If you are interested in using Jupyter with Datalab, you can do the following:
@@ -237,7 +240,7 @@ gcloud beta composer environments run ${COMPOSER_NAME} variables --location ${RE
 ```
 
 #### Import DAG
-You need to run this for all your dag files. This solution only has two located in the [run/airflow/dags](run/airflow/dags) folder.
+You need to run this for all your dag files. This solution has two DAGs located in the [run/airflow/dags](run/airflow/dags) folder.
 
 ```
 gcloud beta composer environments storage dags import \

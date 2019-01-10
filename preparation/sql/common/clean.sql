@@ -14,12 +14,12 @@ FROM
       SELECT
         MAX(PARSE_DATE("%m/%d/%y", SUBSTR(InvoiceDate, 0, 8)))
       FROM
-        `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.original` tl
+        `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.data_source` tl
       WHERE
         tl.CustomerID = t.CustomerID
     ) latest_order
   FROM
-    `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.original` t
+    `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.data_source` t
   GROUP BY
       CustomerID,
       order_date
@@ -44,7 +44,7 @@ INNER JOIN (
             ELSE 0
           END ) positive_value
       FROM
-        `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.original`
+        `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.data_source`
       WHERE
         PARSE_DATE("%m/%d/%y", SUBSTR(InvoiceDate, 0, 8)) < DATE('{{ dag_run.conf['threshold_date'] }}')
       GROUP BY

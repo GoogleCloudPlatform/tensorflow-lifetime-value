@@ -180,7 +180,6 @@ def model_fn(features, labels, mode, params):
   if mode == tf.estimator.ModeKeys.PREDICT:
     
     #[START prediction_output_format]
-    prediction_output_format
     predictions = {
         'customer_id': tf.squeeze(features[clvf.get_key()]),
         'predicted_monetary': output

@@ -92,7 +92,7 @@ FROM
       )
     WHERE
 --[START threshold_date]
-      order_date <= '{{ dag_run.conf['threshold_date'] }}'
+      order_date <= DATE('{{ dag_run.conf['threshold_date'] }}')
 --[END threshold_date]
     GROUP BY
       customer_id) tf,
@@ -104,7 +104,7 @@ FROM
       SUM(order_value) target_monetary
     FROM
       `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.data_cleaned`
-      --WHERE order_date > '{{ dag_run.conf['threshold_date'] }}'
+      --WHERE order_date > DATE('{{ dag_run.conf['threshold_date'] }}')
     GROUP BY
       customer_id) tt
 WHERE

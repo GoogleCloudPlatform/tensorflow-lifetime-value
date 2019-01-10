@@ -1,6 +1,9 @@
 # Customer Lifetime Value Prediction with TensorFlow
 
-This project shows how to use a TensorFlow model to predict customer lifetime value.  The model used is a DNN with batch normalization and dropout. We test the model using [this data set](https://www.kaggle.com/c/acquire-valued-shoppers-challenge) from Kaggle.  We also provide an implementation, using the [Lifetimes library](https://github.com/CamDavidsonPilon/lifetimes) in Python, of [probablistic models](https://rdrr.io/cran/BTYD/) commonly used in industry to perform lifetime value prediction.
+This project shows how to use a TensorFlow model to predict customer lifetime value in the following context:
+- We apply the models using [this data set](http://archive.ics.uci.edu/ml/datasets/Online+Retail) [1].  
+- We provide an implementation using a DNN model with batch normalization and dropout
+- We also provide an implementation, using the [Lifetimes library](https://github.com/CamDavidsonPilon/lifetimes) in Python, of [probablistic models](https://rdrr.io/cran/BTYD/) commonly used in industry to perform lifetime value prediction.
 
 The project also shows how to deploy a production-ready data processing pipeline for lifetime value prediction on Google Cloud Platform, using BigQuery and DataStore with orchestration provided by Cloud Composer.
 
@@ -22,7 +25,7 @@ The code works with python 2/3.  Using Miniconda2:
     conda install -n clv python pip
     pip install -r requirements.txt
 
-### launch jupyter
+### launch Jupyter
 If you are interested in using Jupyter with Datalab, you can do the following:
 
 ```
@@ -282,7 +285,7 @@ gcloud beta composer environments run ${COMPOSER_NAME} \
 trigger_dag \
 -- \
 build_train_deploy \
---conf '{"model_type":"dnn_model", "project":"'${PROJECT}'", "dataset":"'${DATASET_NAME}'", "threshold_date":"2013-01-31", "predict_end":"2013-07-31", "model_name":"dnn_airflow", "model_version":"v1", "tf_version":"1.10", "max_monetary":"20000"}'
+--conf '{"model_type":"dnn_model", "project":"'${PROJECT}'", "dataset":"'${DATASET_NAME}'", "threshold_date":"2011-08-08", "predict_end":"2011-12-12", "model_name":"dnn_airflow", "model_version":"v1", "tf_version":"1.10", "max_monetary":"15000"}'
 ```
 
 ```
@@ -316,7 +319,9 @@ run/mltrain.sh tune gs://your-bucket
 For probablistic models:
 
 ```
-run/mltrain.sh local data --model_type paretonbd_model --threshold_date 2013-01-31 --predict_end 2013-07-31
+run/mltrain.sh local data --model_type paretonbd_model --threshold_date 2011-08-08 --predict_end 2011-12-12
 ```
 
 ### Disclaimer: This is not an official Google product
+
+[1]: Dua, D. and Karra Taniskidou, E. (2017). UCI Machine Learning Repository [http://archive.ics.uci.edu/ml]. Irvine, CA: University of California, School of Information and Computer Science.

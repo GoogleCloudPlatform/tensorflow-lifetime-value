@@ -1,19 +1,3 @@
--- Copyright 2018 Google Inc. All Rights Reserved.
---
--- Licensed under the Apache License, Version 2.0 (the "License");
--- you may not use this file except in compliance with the License.
--- You may obtain a copy of the License at
---
---     http://www.apache.org/licenses/LICENSE-2.0
---
--- Unless required by applicable law or agreed to in writing, software
--- distributed under the License is distributed on an "AS IS" BASIS,
--- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
--- See the License for the specific language governing permissions and
--- limitations under the License.
-
--- Save to table 'data_cleaned'
--- We assume that only one order is passed per day so we agg at that level.
 SELECT
   customer_id,
   order_date,
@@ -22,57 +6,57 @@ SELECT
 FROM
 (
   SELECT
-    id AS customer_id,
-    date AS order_date,
-    ROUND(SUM(purchaseamount), 2) AS order_value,
-    SUM(purchasequantity) AS order_qty_articles,
+    CustomerID AS customer_id,
+    PARSE_DATE("%m/%d/%y", SUBSTR(InvoiceDate, 0, 8)) AS order_date,
+    ROUND(SUM(UnitPrice * Quantity), 2) AS order_value,
+    SUM(Quantity) AS order_qty_articles,
     (
       SELECT
-        MAX(date)
+        MAX(PARSE_DATE("%m/%d/%y", SUBSTR(InvoiceDate, 0, 8)))
       FROM
-        `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.data_source` tl
+        `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.original` tl
       WHERE
-        tl.id = t.id
+        tl.CustomerID = t.CustomerID
     ) latest_order
   FROM
-    `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.data_source` t
+    `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.original` t
   GROUP BY
-      id,
-      date
+      CustomerID,
+      order_date
 ) a
 
 INNER JOIN (
   -- Only customers with more than one positive order values before threshold.
   SELECT
-    id
+    CustomerID
   FROM (
     -- Customers and how many positive order values  before threshold.
     SELECT
-      id,
+      CustomerID,
       SUM(positive_value) cnt_positive_value
     FROM (
       -- Customer with whether order was positive or not at each date.
       SELECT
-        id,
+        CustomerID,
         (
           CASE
-            WHEN SUM(purchaseamount) > 0 THEN 1
+            WHEN SUM(UnitPrice * Quantity) > 0 THEN 1
             ELSE 0
           END ) positive_value
       FROM
-        `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.data_source`
+        `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.original`
       WHERE
-        date < '{{ dag_run.conf['threshold_date'] }}'
+        PARSE_DATE("%m/%d/%y", SUBSTR(InvoiceDate, 0, 8)) < DATE('{{ dag_run.conf['threshold_date'] }}')
       GROUP BY
-        id,
-        date )
+        CustomerID,
+        SUBSTR(InvoiceDate, 0, 8) )
     GROUP BY
-      id )
+      CustomerID )
   WHERE
     cnt_positive_value > 1
   ) b
 ON
-  a.customer_id = b.id
+  a.customer_id = b. CustomerID
 --[START common_clean]
 WHERE
   -- Bought in the past 3 months

@@ -30,7 +30,7 @@ FROM (
     FROM
       `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.data_cleaned`
     WHERE
-      order_date <= '{{ dag_run.conf['threshold_date'] }}'
+      order_date <= DATE('{{ dag_run.conf['threshold_date'] }}')
     GROUP BY
       customer_id) tf,
     (
@@ -45,8 +45,8 @@ FROM (
       customer_id) tt,
     (
     SELECT
-      DATE_DIFF('{{ dag_run.conf['threshold_date'] }}', MIN(order_date), DAY) feature_days,
-      DATE_DIFF('{{ dag_run.conf['predict_end'] }}', '{{ dag_run.conf['threshold_date'] }}', DAY) target_days
+      DATE_DIFF(DATE('{{ dag_run.conf['threshold_date'] }}'), MIN(order_date), DAY) feature_days,
+      DATE_DIFF(DATE('{{ dag_run.conf['predict_end'] }}'), DATE('{{ dag_run.conf['threshold_date'] }}'), DAY) target_days
     FROM
       `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.data_cleaned` ) AS days
   WHERE

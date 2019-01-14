@@ -25,7 +25,8 @@ The code works with python 2/3.  Using Miniconda2:
     ```
     conda create -y -n clv
     source activate clv
-    conda install -n clv --file requirements.txt
+    conda install -y -n clv python=2.7 pip
+    pip install -r requirements.txt
     ```
 
 ### launch Jupyter

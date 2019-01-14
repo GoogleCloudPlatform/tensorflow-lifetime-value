@@ -48,6 +48,7 @@ def load_data(datapath):
   tf.logging.info('Loading data...')
 
   ft_file = '{0}/{1}'.format(datapath, TRAINING_DATA_FILE)
+#[START prob_selec]
   df_ft = pd.read_csv(ft_file)
 
   # Extracts relevant dataframes for RFM:
@@ -55,6 +56,7 @@ def load_data(datapath):
   # - actual_df has values of the overall period.
   summary = df_ft[['customer_id', 'frequency_btyd', 'recency', 'T',
                    'monetary_btyd']]
+#[END prob_selec]
   summary.columns = ['customer_id', 'frequency', 'recency', 'T',
                      'monetary_value']
   summary = summary.set_index('customer_id')

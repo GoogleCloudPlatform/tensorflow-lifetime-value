@@ -11,46 +11,48 @@
             "type": "DOUBLE",
             "minValue": "0.0001",
             "maxValue": "0.1",
-            "scaleType": "UNIT_LINEAR_SCALE"
-          },
-          {
-            "parameterName": "learning_rate_decay",
-            "type": "CATEGORICAL",
-            "categoricalValues": ["True", "False"]
+            "scaleType": "UNIT_REVERSE_LOG_SCALE"
           },
           {
             "parameterName": "l1_regularization",
             "type": "DOUBLE",
-            "minValue": "0.001",
+            "minValue": "0.0001",
             "maxValue": "0.1",
-            "scaleType": "UNIT_LINEAR_SCALE"
+            "scaleType": "UNIT_REVERSE_LOG_SCALE"
           },
           {
             "parameterName": "l2_regularization",
             "type": "DOUBLE",
             "minValue": "0.0001",
             "maxValue": "0.1",
-            "scaleType": "UNIT_LINEAR_SCALE"
+            "scaleType": "UNIT_REVERSE_LOG_SCALE"
           },
           {
             "parameterName": "dropout",
-            "minValue": 0.0001,
-            "maxValue": 0.90,
+            "minValue": 0.01,
+            "maxValue": 0.99,
             "type": "DOUBLE",
             "scaleType": "UNIT_REVERSE_LOG_SCALE"
           },
           {
+            "parameterName": "learning_decay_rate",
+            "minValue": 0.6,
+            "maxValue": 0.99,
+            "type": "DOUBLE",
+            "scaleType": "UNIT_LINEAR_SCALE"
+          },
+          {
             "parameterName": "hidden_units",
             "type": "CATEGORICAL",
-            "categoricalValues": ["128 64 32 16", "128 64 32", "256 128", "128 64", "64 32", "64", "32"]
+            "categoricalValues": ["256 128 64 32", "128 64 32 16", "256 128 64 32 16", "128 64 32 16 16 8"]
           },
           {
             "parameterName": "batch_size",
             "type": "DISCRETE",
-            "discreteValues": ["5", "10", "20", "50", "100", "200"],
+            "discreteValues": ["5", "10", "15", "20", "25", "30"],
           }
         ],
-        "maxTrials": 5000,
+        "maxTrials": 1000,
         "maxParallelTrials": 10
     }
   }

@@ -23,10 +23,10 @@ from .context import CLVFeatures
 
 # Possible estimators:
 # Canned: https://www.tensorflow.org/api_docs/python/tf/estimator or custom ones
-CANNED_MODEL_TYPES = ['DNNRegressor']
+CANNED_MODEL_TYPES = ['DNNRegressor', 'Linear']
 MODEL_TYPES = CANNED_MODEL_TYPES[:] + ['dnn_model', 'paretonbd_model',
                                        'bgnbd_model']
-CANNED_DEEP, DEEP, PARETO, BGNBD = MODEL_TYPES
+CANNED_DEEP, DEEP, LINEAR, PARETO, BGNBD = MODEL_TYPES
 PROBABILISTIC_MODEL_TYPES = [PARETO, BGNBD]
 
 # Either a custom function or a canned estimator name

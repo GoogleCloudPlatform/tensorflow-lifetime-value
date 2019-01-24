@@ -40,6 +40,7 @@ NUM_EPOCHS = 70
 BATCH_SIZE = 20
 NUM_EVAL = 20
 
+LEARNING_DECAY_RATE = 0.7
 HIDDEN_UNITS = '128 64 32 16'
 LEARNING_RATE = 0.096505
 L1_REGULARIZATION = 0.0026019
@@ -84,6 +85,10 @@ def create_parser():
                       type=str,
                       help='Use learning rate decay [True|False]',
                       default='True')
+  parser.add_argument('--learning_decay_rate',
+                      help='Learning decay rate',
+                      type=float,
+                      default=LEARNING_DECAY_RATE)
   parser.add_argument('--train_size',
                       help='(Approximate) size of training set',
                       default=TRAIN_SIZE,
@@ -221,6 +226,7 @@ def main(argv=None):
       buffer_size=args.buffer_size,
       learning_rate_decay=(
           args.learning_rate_decay == 'True'),
+      learning_decay_rate=args.learning_decay_rate,
       l1_regularization=args.l1_regularization,
       l2_regularization=args.l2_regularization,
       optimizer=args.optimizer,

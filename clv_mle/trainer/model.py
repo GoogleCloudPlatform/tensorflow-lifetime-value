@@ -178,7 +178,7 @@ def model_fn(features, labels, mode, params):
 
   # Returns an estimator spec for PREDICT.
   if mode == tf.estimator.ModeKeys.PREDICT:
-    
+
     #[START prediction_output_format]
     predictions = {
         'customer_id': tf.squeeze(features[clvf.get_key()]),
@@ -247,7 +247,7 @@ def get_learning_rate(params):
         learning_rate=params.learning_rate,
         global_step=global_step,
         decay_steps=params.checkpoint_steps,
-        decay_rate=0.7,
+        decay_rate=params.learning_decay_rate,
         staircase=True
     )
   else:

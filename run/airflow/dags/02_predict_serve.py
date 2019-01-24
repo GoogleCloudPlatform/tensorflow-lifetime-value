@@ -70,7 +70,7 @@ def do_predict_clv(**kwargs):
     """ Runs a batch prediction on new data and saving the results as CSV into
     output_path.
     """
-    gcs_prediction_intput = 'gs://{}/predictions/to_predict.csv'.format(COMPOSER_BUCKET_NAME)
+    gcs_prediction_input = 'gs://{}/predictions/to_predict.csv'.format(COMPOSER_BUCKET_NAME)
     gcs_prediction_output = 'gs://{}/predictions/output'.format(COMPOSER_BUCKET_NAME)
     model_name = kwargs['dag_run'].conf.get('model_name')
     model_version = kwargs['dag_run'].conf.get('model_version')
@@ -84,7 +84,7 @@ def do_predict_clv(**kwargs):
         job_id=job_id,
         region=REGION,
         data_format='TEXT',
-        input_paths=gcs_prediction_intput,
+        input_paths=gcs_prediction_input,
         output_path=gcs_prediction_output,
         model_name=model_name,
         version_name=model_version,

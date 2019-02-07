@@ -1,3 +1,5 @@
+This code supports the three-part solution published on cloud.google.com [Predicting Customer Lifetime Value with Cloud ML Engine](https://cloud.google.com/solutions/machine-learning/clv-prediction-with-offline-training-intro)
+
 # Customer Lifetime Value Prediction with TensorFlow
 
 This project shows how to use a TensorFlow model to predict customer lifetime value in the following context:
@@ -13,21 +15,21 @@ The project also shows how to deploy a production-ready data processing pipeline
 
 The code works with python 2/3.  Using Miniconda2:
 
-    ```
-    sudo apt-get install -y git bzip2
-    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
-    bash Miniconda2-latest-Linux-x86_64.sh -b
-    export PATH=~/miniconda2/bin:$PATH
-    ```
+```
+sudo apt-get install -y git bzip2
+wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+bash Miniconda2-latest-Linux-x86_64.sh -b
+export PATH=~/miniconda2/bin:$PATH
+```
 
 ### create environment
 
-    ```
-    conda create -y -n clv
-    source activate clv
-    conda install -y -n clv python=2.7 pip
-    pip install -r requirements.txt
-    ```
+```
+conda create -y -n clv
+source activate clv
+conda install -y -n clv python=2.7 pip
+pip install -r requirements.txt
+```
 
 ### launch Jupyter
 If you are interested in using Jupyter with Datalab, you can do the following:

@@ -1,4 +1,4 @@
-This code supports the three-part solution published on cloud.google.com [Predicting Customer Lifetime Value with Cloud ML Engine](https://cloud.google.com/solutions/machine-learning/clv-prediction-with-offline-training-intro)
+This code supports the three-part solution [Predicting Customer Lifetime Value with Cloud ML Engine](https://cloud.google.com/solutions/machine-learning/clv-prediction-with-offline-training-intro) published on cloud.google.com.
 
 # Customer Lifetime Value Prediction with TensorFlow
 

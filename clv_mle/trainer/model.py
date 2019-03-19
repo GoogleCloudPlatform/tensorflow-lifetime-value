@@ -23,10 +23,10 @@ from .context import CLVFeatures
 
 # Possible estimators:
 # Canned: https://www.tensorflow.org/api_docs/python/tf/estimator or custom ones
-CANNED_MODEL_TYPES = ['DNNRegressor']
+CANNED_MODEL_TYPES = ['DNNRegressor', 'Linear']
 MODEL_TYPES = CANNED_MODEL_TYPES[:] + ['dnn_model', 'paretonbd_model',
                                        'bgnbd_model']
-CANNED_DEEP, DEEP, PARETO, BGNBD = MODEL_TYPES
+CANNED_DEEP, LINEAR, DEEP, PARETO, BGNBD = MODEL_TYPES
 PROBABILISTIC_MODEL_TYPES = [PARETO, BGNBD]
 
 # Either a custom function or a canned estimator name
@@ -178,7 +178,7 @@ def model_fn(features, labels, mode, params):
 
   # Returns an estimator spec for PREDICT.
   if mode == tf.estimator.ModeKeys.PREDICT:
-    
+
     #[START prediction_output_format]
     predictions = {
         'customer_id': tf.squeeze(features[clvf.get_key()]),
@@ -247,7 +247,7 @@ def get_learning_rate(params):
         learning_rate=params.learning_rate,
         global_step=global_step,
         decay_steps=params.checkpoint_steps,
-        decay_rate=0.7,
+        decay_rate=params.learning_decay_rate,
         staircase=True
     )
   else:

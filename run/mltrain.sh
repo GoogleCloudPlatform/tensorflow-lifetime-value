@@ -16,7 +16,7 @@
 
 
 usage () {
-  echo "usage: run/mltrain.sh [local | train | tune] [gs://]data_folder_or_bucket
+  echo "usage: run/mltrain.sh [local | train | tune] [gs://]data_folder_or_bucket [args]
 
 Use 'local' to train locally with a local data folder, and 'train' and 'tune' to
 run on ML Engine.
@@ -26,6 +26,9 @@ folder will be gs://bucket/data and the job directory will be gs://bucket/jobs.
 So your data files must already be in gs://bucket/data.  For DNN models the
 data should be named 'train.csv', 'eval.csv' and 'test.csv, for probablistic
 models the file must be 'btyd.csv'.
+
+For probabilistic models, specify '--model_type paretonbd_model' and include
+--threshold_date and --predict_end args.
 
 Examples:
 
@@ -37,6 +40,9 @@ Examples:
 
    # tune hyperparams on ML Engine:
    run/mltrain.sh tune gs://your_bucket
+
+   # train using btyd models
+   run/mltrain.sh local data --model_type paretonbd_model --threshold_date 2011-08-08 --predict_end 2011-12-12
 "
 
 }

@@ -14,7 +14,7 @@
 
 import datetime, json, re, logging
 from airflow import models
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python_operator import PythonOperator, BranchPythonOperator
 from airflow.hooks.base_hook import BaseHook
 from airflow.contrib.operators import bigquery_operator
 from airflow.contrib.operators import bigquery_get_data
@@ -24,8 +24,13 @@ from airflow.contrib.operators import mlengine_operator
 from airflow.contrib.operators import mlengine_operator_utils
 from airflow.contrib.hooks.gcp_mlengine_hook import MLEngineHook
 from airflow.contrib.hooks.gcs_hook import GoogleCloudStorageHook
+from airflow.contrib.hooks.gcp_api_base_hook import GoogleCloudBaseHook
 from airflow.operators import bash_operator
+from airflow.operators.dummy_operator import DummyOperator
 from airflow.utils import trigger_rule
+
+from google.cloud.automl_v1beta1 import AutoMlClient
+from clv_automl import clv_automl
 
 def _get_project_id():
   """Get project ID from default GCP connection."""
@@ -53,6 +58,11 @@ PREFIX_FINAL_MODEL = '{}/final'.format(PREFIX_JOBS_EXPORT)
 
 MODEL_PACKAGE_NAME = 'clv_ml_engine-0.1.tar.gz' # Matches name in setup.py
 
+AUTOML_DATASET = models.Variable.get('automl_dataset')
+AUTOML_MODEL = models.Variable.get('automl_model')
+AUTOML_TRAINING_BUDGET = int(models.Variable.get('automl_training_budget'))
+
+
 #[START dag_build_train_deploy]
 default_dag_args = {
     'start_date': datetime.datetime(2050, 1, 1),
@@ -64,6 +74,10 @@ dag = models.DAG(
     'build_train_deploy',
     default_args = default_dag_args)
 #[END dag_build_train_deploy]
+
+# instantiate Google Cloud base hook to get credentials and create automl clients
+gcp_hook = GoogleCloudBaseHook(conn_id='google_cloud_default')
+automl_client = AutoMlClient(credentials=gcp_hook._get_credentials())
 
 # Loads the database dump from Cloud Storage to BigQuery
 t1 = gcs_to_bq.GoogleCloudStorageToBigQueryOperator(
@@ -115,6 +129,40 @@ t3 = bigquery_operator.BigQueryOperator(
     write_disposition="WRITE_TRUNCATE",
     dag=dag
 )
+
+
+def get_model_type(**kwargs):
+  model_type = kwargs['dag_run'].conf.get('model_type')
+  if model_type == 'automl':
+    model_train_task = 'train_automl'
+  else:
+    model_train_task = 'train_ml_engine'
+  return model_train_task
+
+t4_train_cond = BranchPythonOperator(task_id='train_branch', dag=dag, python_callable=get_model_type)
+
+#
+# Train the model using AutoML
+#
+def do_train_automl(**kwargs):
+    """
+    Create, train and deploy automl model.
+    """
+    model_name = clv_automl.create_automl_model(automl_client,
+                                                PROJECT,
+                                                REGION,
+                                                DATASET,
+                                                'features_n_target',
+                                                AUTOML_DATASET,
+                                                AUTOML_MODEL,
+                                                AUTOML_TRAINING_BUDGET)
+    clv_automl.deploy_model(automl_client, model_name)
+
+t4_automl = PythonOperator(
+    task_id='train_automl', dag=dag, python_callable=do_train_automl)
+
+
+t4_ml_engine = DummyOperator(task_id='train_ml_engine', dag=dag)
 
 # Split the data into a training set and evaluation set within BigQuery
 t4a = bigquery_operator.BigQueryOperator(
@@ -195,16 +243,17 @@ t5d = bigquery_to_gcs.BigQueryToCloudStorageOperator(
     dag=dag
 )
 
+
 #
-# Have ML Engine periodically train the model
+# Train the model using ML Engine (TensorFlow DNN or Lifetimes BTYD)
 #
-def do_train_model(**kwargs):
+def do_train_ml_engine(**kwargs):
     """
     """
     job_id = 'clv-{}'.format(datetime.datetime.now().strftime('%Y%m%d%H%M'))
 
     mlengine_operator.MLEngineTrainingOperator(
-        task_id='train_dnn',
+        task_id='train_ml_engine_job',
         project_id=PROJECT,
         job_id=job_id,
         package_uris=['gs://{}/code/{}'.format(COMPOSER_BUCKET_NAME, MODEL_PACKAGE_NAME)],
@@ -216,9 +265,8 @@ def do_train_model(**kwargs):
         dag=dag
     ).execute(kwargs)
 
-
 t6 = PythonOperator(
-    task_id='train_model', dag=dag, python_callable=do_train_model)
+    task_id='train_ml_engine_task', dag=dag, python_callable=do_train_ml_engine)
 
 #
 # Copies the latest model to a consistent 'final' bucket
@@ -259,11 +307,10 @@ def do_copy_model_to_final(**kwargs):
         )
 
 # Note that this could be done as well in Tensorflow using tf.gFile aftet the
-# model is created but for  flexibility reason, it was decided to do this in the
-# wider worflow. This way, it is also possible pick other models
+# model is created but for reasons of flexibility, it was decided to do this in the
+# wider workflow. This way, it is also possible pick other models.
 t7 = PythonOperator(
     task_id='copy_model_to_final',
-    project_id=PROJECT,
     python_callable=do_copy_model_to_final,
     dag=dag)
 
@@ -358,11 +405,13 @@ t10 = PythonOperator(
 t11 = PythonOperator(
     task_id='create_version', dag=dag, python_callable=do_create_version)
 
-# How to link them
+# Create task graph
 t1.set_downstream(t2)
 t2.set_downstream(t3)
-t3.set_downstream([t4a, t4b, t4c])
-t3.set_downstream(t5d)
+t3.set_downstream(t4_train_cond)
+t4_train_cond.set_downstream([t4_ml_engine, t4_automl])
+t4_ml_engine.set_downstream([t4a, t4b, t4c])
+t4_ml_engine.set_downstream(t5d)
 t4a.set_downstream(t5a)
 t4b.set_downstream(t5b)
 t4c.set_downstream(t5c)

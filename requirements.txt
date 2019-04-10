@@ -1,5 +1,6 @@
-tensorflow==1.10.0
-jupyter==1.0.0
+google-cloud-automl>=0.1.2
+tensorflow==1.13.1
+jupyter
 apache-beam==2.2.0
 ipdb
 lifetimes==0.9.0.0

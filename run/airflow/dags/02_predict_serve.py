@@ -14,7 +14,7 @@
 
 import datetime, json, logging
 from airflow import models
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python_operator import PythonOperator, BranchPythonOperator
 from airflow.hooks.base_hook import BaseHook
 from airflow.contrib.operators import mlengine_operator
 from airflow.contrib.operators import mlengine_operator_utils
@@ -22,8 +22,18 @@ from airflow.contrib.operators import dataflow_operator
 from airflow.contrib.operators import gcs_to_bq
 # TODO Add when Composer on v2.0 and more Hook
 # from airflow.contrib.operators import gcs_list_operator
-from airflow.contrib.hooks import GoogleCloudStorageHook
+from airflow.contrib.hooks.gcs_hook import GoogleCloudStorageHook
+from airflow.contrib.hooks.gcp_api_base_hook import GoogleCloudBaseHook
 from airflow.utils import trigger_rule
+
+from google.cloud.automl_v1beta1 import AutoMlClient, PredictionServiceClient
+from clv_automl import clv_automl
+
+# instantiate Google Cloud base hook to get credentials and create automl clients
+gcp_credentials = GoogleCloudBaseHook(conn_id='google_cloud_default')._get_credentials()
+automl_client = AutoMlClient(credentials=gcp_credentials)
+automl_predict_client = PredictionServiceClient(credentials=gcp_credentials)
+
 
 def _get_project_id():
   """Get project ID from default GCP connection."""
@@ -41,7 +51,7 @@ PROJECT = _get_project_id()
 REGION = models.Variable.get('region')
 DF_ZONE = models.Variable.get('df_zone')
 DF_TEMP = models.Variable.get('df_temp_location')
-COMPOSER_BUCKET_NAME = models.Variable.get('COMPOSER_BUCKET_NAME')
+COMPOSER_BUCKET_NAME = models.Variable.get('composer_bucket_name')
 
 #[START dag_predict_serve]
 default_dag_args = {
@@ -64,12 +74,22 @@ dag = models.DAG(
 # Runs prediction.
 #
 
-job_id = 'clv-{}'.format(datetime.datetime.now().strftime('%Y%m%d%H%M'))
+def get_model_type(**kwargs):
+  model_type = kwargs['dag_run'].conf.get('model_type')
+  if model_type == 'automl':
+    model_train_task = 'predict_automl'
+  else:
+    model_train_task = 'predict_ml_engine'
+  return model_train_task
 
-def do_predict_clv(**kwargs):
+t0_predict_cond = BranchPythonOperator(task_id='predict_branch', dag=dag, python_callable=get_model_type)
+
+
+def do_predict_mle(**kwargs):
     """ Runs a batch prediction on new data and saving the results as CSV into
     output_path.
     """
+    job_id = 'clv-{}'.format(datetime.datetime.now().strftime('%Y%m%d%H%M'))
     gcs_prediction_input = 'gs://{}/predictions/to_predict.csv'.format(COMPOSER_BUCKET_NAME)
     gcs_prediction_output = 'gs://{}/predictions/output'.format(COMPOSER_BUCKET_NAME)
     model_name = kwargs['dag_run'].conf.get('model_name')
@@ -93,8 +113,29 @@ def do_predict_clv(**kwargs):
         dag=dag
     ).execute(kwargs)
 
-t1 = PythonOperator(
-    task_id='predict_clv', dag=dag, python_callable=do_predict_clv)
+
+def do_predict_automl(**kwargs):
+  # get model resource name
+  automl_model = models.Variable.get('automl_model')
+  location_path = automl_client.location_path(PROJECT, REGION)
+  model_list_response = automl_client.list_models(location_path)
+  model_list = [m for m in model_list_response]
+  model = [m for m in model_list if m.display_name == automl_model][0]
+
+  # run batch prediction
+  gcs_prediction_input = 'gs://{}/predictions/to_predict.csv'.format(COMPOSER_BUCKET_NAME)
+  gcs_prediction_output = 'gs://{}/predictions/output'.format(COMPOSER_BUCKET_NAME)
+  clv_automl.do_batch_prediction(automl_predict_client,
+                                 model.name,
+                                 gcs_prediction_input,
+                                 gcs_prediction_output)
+
+t1a = PythonOperator(
+          task_id='predict_ml_engine', dag=dag, python_callable=do_predict_mle)
+
+t1b = PythonOperator(
+          task_id='predict_automl', dag=dag, python_callable=do_predict_automl)
+
 
 #
 # Load the predictions from GCS to Datastore.
@@ -199,8 +240,9 @@ t4 = PythonOperator(
     task_id='load_to_bq', dag=dag, python_callable=do_load_to_bq)
 
 # How to link them
-t1.set_downstream(t2)
-t1.set_downstream(t3)
+t0_predict_cond.set_downstream([t1a, t1b])
+t2.set_upstream([t1a, t1b])
+t3.set_upstream([t1a, t1b])
 t3.set_downstream(t4)
 
 

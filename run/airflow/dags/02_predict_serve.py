@@ -23,16 +23,10 @@ from airflow.contrib.operators import gcs_to_bq
 # TODO Add when Composer on v2.0 and more Hook
 # from airflow.contrib.operators import gcs_list_operator
 from airflow.contrib.hooks.gcs_hook import GoogleCloudStorageHook
-from airflow.contrib.hooks.gcp_api_base_hook import GoogleCloudBaseHook
 from airflow.utils import trigger_rule
 
 from google.cloud.automl_v1beta1 import AutoMlClient, PredictionServiceClient
 from clv_automl import clv_automl
-
-# instantiate Google Cloud base hook to get credentials and create automl clients
-gcp_credentials = GoogleCloudBaseHook(conn_id='google_cloud_default')._get_credentials()
-automl_client = AutoMlClient(credentials=gcp_credentials)
-automl_predict_client = PredictionServiceClient(credentials=gcp_credentials)
 
 
 def _get_project_id():
@@ -115,6 +109,10 @@ def do_predict_mle(**kwargs):
 
 
 def do_predict_automl(**kwargs):
+  # get automl clients
+  automl_client = AutoMlClient()
+  automl_predict_client = PredictionServiceClient()
+
   # get model resource name
   automl_model = models.Variable.get('automl_model')
   location_path = automl_client.location_path(PROJECT, REGION)

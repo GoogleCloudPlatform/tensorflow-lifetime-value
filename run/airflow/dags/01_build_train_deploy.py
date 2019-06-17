@@ -24,7 +24,6 @@ from airflow.contrib.operators import mlengine_operator
 from airflow.contrib.operators import mlengine_operator_utils
 from airflow.contrib.hooks.gcp_mlengine_hook import MLEngineHook
 from airflow.contrib.hooks.gcs_hook import GoogleCloudStorageHook
-from airflow.contrib.hooks.gcp_api_base_hook import GoogleCloudBaseHook
 from airflow.operators import bash_operator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.utils import trigger_rule
@@ -75,9 +74,6 @@ dag = models.DAG(
     default_args = default_dag_args)
 #[END dag_build_train_deploy]
 
-# instantiate Google Cloud base hook to get credentials and create automl clients
-gcp_hook = GoogleCloudBaseHook(conn_id='google_cloud_default')
-automl_client = AutoMlClient(credentials=gcp_hook._get_credentials())
 
 # Loads the database dump from Cloud Storage to BigQuery
 t1 = gcs_to_bq.GoogleCloudStorageToBigQueryOperator(
@@ -148,6 +144,9 @@ def do_train_automl(**kwargs):
     """
     Create, train and deploy automl model.
     """
+    # instantiate automl client
+    automl_client = AutoMlClient()
+
     model_name = clv_automl.create_automl_model(automl_client,
                                                 PROJECT,
                                                 REGION,

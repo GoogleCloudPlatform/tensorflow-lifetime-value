@@ -35,10 +35,10 @@ pip install -r requirements.txt
 ```
 
 ### Enable the required APIs in your GCP Project
-Cloud Composer API
-Machine Learning API (for TensorFlow / Lifetimes models)
-Dataflow API
-AutoML Tables API (for AutoML Tables models)
+- Cloud Composer API
+- Machine Learning API (for TensorFlow / Lifetimes models)
+- Dataflow API
+- AutoML Tables API (for AutoML Tables models)
 
 
 ### Environment setup
@@ -192,15 +192,21 @@ To run training or hypertuning for the non-automl models you can use the mltrain
 
 For example:
 
+Train the DNN model on local data:
+
 ```
 cd ${LOCAL_FOLDER}
 gsutil -m cp -r ${COMPOSER_BUCKET}/data .
 run/mltrain.sh local data
 ```
 
+Train the DNN model in a Cloud ML Engine job on data in the ${COMPOSER_BUCKET}:
+
 ```
 run/mltrain.sh train ${COMPOSER_BUCKET}
 ```
+
+Run hyperparameter tuning on Cloud ML Engine:
 
 ```
 run/mltrain.sh tune gs://your-bucket
@@ -248,7 +254,7 @@ gcloud composer environments storage dags import \
 ```
 
 #### Other files
-Some files are important when running the DAG. They can be saved in the `data` folder:
+Some files are important when running the DAG. They need to be placed in the composer bucket:
 
 1 - The BigQuery schema file used to load data into BigQuery
 
@@ -364,7 +370,7 @@ gcloud composer environments storage dags import \
 
 
 ### Run DAGs
-You now should have both DAGs and the SQL files in the Cloud Composer's reserved bucket. Because you probably want to run training and prediction tasks independently, you can run the following script as needed. For more automatic runs (like daily for example, refer to the Airflow documentation to setup your DAGs accordingly.
+You now should have both DAGs and the SQL files in the Cloud Composer's reserved bucket. Because you probably want to run training and prediction tasks independently, you can run the following script as needed. For more automatic runs (like daily for example), refer to the Airflow documentation to setup your DAGs accordingly.
 
 Airflow can take various parameters as inputs.
 

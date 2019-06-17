@@ -6,3 +6,7 @@ trained/*
 images/
 nul
 .ipynb_checkpoints
+mykey.json
+run/airflow/*cfg
+run/airflow/airflow.db
+default.profraw

@@ -65,7 +65,7 @@ AUTOML_TRAINING_BUDGET = int(models.Variable.get('automl_training_budget'))
 #[START dag_build_train_deploy]
 default_dag_args = {
     'start_date': datetime.datetime(2050, 1, 1),
-    'schedule_internal': None,
+    'schedule_interval': None,
     'provide_context': True
 }
 

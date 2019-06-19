@@ -50,7 +50,7 @@ COMPOSER_BUCKET_NAME = models.Variable.get('composer_bucket_name')
 #[START dag_predict_serve]
 default_dag_args = {
     'start_date': datetime.datetime(2050, 1, 1),
-    'schedule_internal': None,
+    'schedule_interval': None,
     'provide_context': True,
     'dataflow_default_options': {
         'project': PROJECT,

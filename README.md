@@ -3,6 +3,14 @@ This code supports the three-part solution [Predicting Customer Lifetime Value w
 This code is also used in the updated solution [Predicting Customer Lifetime Value with AutoML Tables ](https://cloud.google.com/solutions/machine-learning/clv-prediction-with-automl-tables) published on cloud.google.com.
 
 # Customer Lifetime Value Prediction on GCP
+Converting to run on your desktop, so there is no dependency on GCP and BigQuery
+## Get data locally
+1. Make sure you download data from UC Irvine website: http://archive.ics.uci.edu/ml/machine-learning-databases/00352/
+2. Convert into csv file and place it under data/ folder
+3. Next step is prepare data which is Airflow pipeline and uses BigQuery, since we wont have bigquery locally, we need to either change this DAG for airflow or do the clean and prepare steps ourselves using spark or pandas -#TODO
+
+
+# Customer Lifetime Value Prediction on GCP
 
 This project shows how to use ML models to predict customer lifetime value in the following context:
 - We apply the models using [this data set](http://archive.ics.uci.edu/ml/datasets/Online+Retail) [1].

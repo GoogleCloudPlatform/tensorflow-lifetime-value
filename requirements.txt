@@ -1,9 +1,9 @@
 google-cloud-automl>=0.1.2
 tensorflow==1.13.1
 jupyter
-apache-beam==2.2.0
+apache-beam==2.15.0
 ipdb
-lifetimes==0.9.0.0
+lifetimes==0.11.1
 google-api-python-client==1.7.3
 google-cloud-bigquery==0.32.0
 seaborn==0.8.1

@@ -69,15 +69,11 @@ shift; shift
 
 if [[ ${TRAIN_JOB} == "local" ]]; then
 
-  ARGS="--data-src ${DATA_DIR} --verbose-logging $@"
+  ARGS="--data-src ${DATA_DIR} --model_type=dnn_model --job-dir=jobs/${JOB_NAME} --hidden_units=12 --learning_rate=0.1 --learning_decay_rate=0.001 --train_size=541910 --batch_size=1024 --buffer_size=102400 --train_set_size=500000 --l1_regularization=0.001 --l2_regularization=0.01 --dropout=0.4 --optimizer=ProximialAdagrad --num_epochs=20 --labels=22 --verbose-logging $@"
 
   mkdir -p jobs/${JOB_NAME}
 
-  gcloud ml-engine local train \
-    --job-dir jobs/${JOB_NAME} \
-    --module-name clv_mle.trainer.task \
-    --package-path trainer \
-    -- \
+  python3 -m clv_mle.trainer.task \
     ${ARGS}
 
 elif [[ ${TRAIN_JOB} == "train" ]]; then

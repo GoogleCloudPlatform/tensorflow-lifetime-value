@@ -110,7 +110,7 @@ def create_parser():
   parser.add_argument('--buffer_size',
                       help='Size of the buffer for training shuffle.',
                       default=SHUFFLE_BUFFER_SIZE,
-                      type=float)
+                      type=int)
   parser.add_argument('--train_set_size',
                       help='Number of samples on the train dataset.',
                       type=int)

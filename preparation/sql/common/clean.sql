@@ -46,7 +46,7 @@ INNER JOIN (
       FROM
         `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.data_source`
       WHERE
-        PARSE_DATE("%m/%d/%y", SUBSTR(InvoiceDate, 0, 8)) < DATE('{{ dag_run.conf['threshold_date'] }}')
+        PARSE_DATE("%m/%d/%y", SUBSTR(InvoiceDate, 0, 8)) < DATE(`{{ dag_run.conf['threshold_date'] }}`)
       GROUP BY
         CustomerID,
         SUBSTR(InvoiceDate, 0, 8) )
@@ -60,7 +60,7 @@ ON
 --[START common_clean]
 WHERE
   -- Bought in the past 3 months
-  DATE_DIFF(DATE('{{ dag_run.conf['predict_end'] }}'), latest_order, DAY) <= 90
+  DATE_DIFF(DATE(`{{ dag_run.conf['predict_end'] }}`), latest_order, DAY) <= 90
   -- Make sure returns are consistent.
   AND (
     (order_qty_articles > 0 and order_Value > 0) OR

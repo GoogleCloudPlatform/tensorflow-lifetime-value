@@ -1,5 +1,5 @@
 google-cloud-automl>=0.1.2
-tensorflow==1.13.1
+tensorflow==2.3.1
 jupyter
 apache-beam==2.2.0
 ipdb

@@ -12,11 +12,14 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+-- Save to table 'dnn_test'
+--[START split_test]
 SELECT
   *
 FROM
   `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.features_n_target`
 WHERE
-  -- TRAIN
+  -- TEST
   MOD(ABS(FARM_FINGERPRINT(CAST(customer_id AS STRING))), 100000) > 85000 AND
   MOD(ABS(FARM_FINGERPRINT(CAST(customer_id AS STRING))), 100000) < 100000
+--[END split_test]

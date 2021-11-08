@@ -106,6 +106,15 @@ ${DATASET_NAME}.data_source \
 ${BUCKET}/db_dump.csv \
 ./run/airflow/schema_source.json
 ```
+
+### Clean & Aggregate BQ data tables
+1. 'data_source' -> [clean.sql](preparation/sql/common/clean.sql) -> 'data_cleaned'
+2. 'data_cleaned' -> [features_n_target.sql](preparation/sql/common/features_n_target.sql) -> 'features_n_target'
+3. 'data_cleaned' -> [benchmark.sql](preparation/sql/common/benchmark.sql) -> 'benchmark'
+4. 'features_n_target' -> [dnn/split_train.sql](preparation/sql/dnn/split_train.sql) -> 'dnn_train'
+5. 'features_n_target' -> [dnn/split_test.sql](preparation/sql/dnn/split_test.sql) -> 'dnn_test'
+6. 'features_n_target' -> [dnn/split_eval.sql](preparation/sql/dnn/split_eval.sql) -> 'dnn_eval'
+
 ### Create a service account
 Creating a service account is important to make sure that your Cloud Composer instance can perform the required tasks within BigQuery, AutoML Tables, ML Engine, Dataflow, Cloud Storage and Datastore.  It is also needed to run training for AutoML locally.
 

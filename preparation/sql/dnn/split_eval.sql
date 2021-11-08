@@ -12,11 +12,14 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+-- Save to table 'dnn_eval'
+--[START split_eval]
 SELECT
   *
 FROM
   `{{ dag_run.conf['project'] }}.{{ dag_run.conf['dataset'] }}.features_n_target`
 WHERE
-  -- TRAIN
+  -- EVAL
   MOD(ABS(FARM_FINGERPRINT(CAST(customer_id AS STRING))), 100000) > 70000 AND
   MOD(ABS(FARM_FINGERPRINT(CAST(customer_id AS STRING))), 100000) < 85000
+--[END split_eval]

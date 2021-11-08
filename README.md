@@ -40,6 +40,12 @@ pip install -r requirements.txt
 - Dataflow API
 - AutoML Tables API (for AutoML Tables models)
 
+```
+list=()
+for service in composer ml dataflow automl; do; list+=(${service}.googleapis.com); done
+gcloud services enable "${list[@]}"
+```
+
 
 ### Environment setup
 Before running the training and Airflow scripts, you need some environment variables:
@@ -71,6 +77,10 @@ bq --location=US mk --dataset ${PROJECT}:${DATASET_NAME}
 ```
 
 Create a datastore database as detailed in the [Datastore documentation](https://cloud.google.com/datastore/docs/quickstart)
+```
+gcloud app create --region=$REGION
+gcloud datastore databases create --region $REGION
+```
 
 
 ### Copy the raw dataset
@@ -88,6 +98,15 @@ gsutil cp ${BUCKET}/predictions/to_predict.csv ${COMPOSER_BUCKET}/predictions/
 
 ```
 
+### Create BQ Table from CSV dataset
+```
+bq load \
+--source_format=CSV \
+--autodetect \
+${DATASET_NAME}.data_source \
+${BUCKET}/db_dump.csv \
+./run/airflow/schema_source.json
+```
 ### Create a service account
 Creating a service account is important to make sure that your Cloud Composer instance can perform the required tasks within BigQuery, AutoML Tables, ML Engine, Dataflow, Cloud Storage and Datastore.  It is also needed to run training for AutoML locally.
 
@@ -139,6 +158,10 @@ Wait until the service account has all the proper roles setup.
 ### Download API Key for AutoML Tables
 
 [Create a service account API key](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) and download the json keyfile to run training for AutoML locally.
+```
+gcloud iam service-accounts keys create mykey.json \
+    --iam-account=composer@${PROJECT}.iam.gserviceaccount.com
+```
 
 
 ### Upload Machine Learning Engine packaged file

@@ -91,11 +91,10 @@ gsutil cp ${BUCKET}/db_dump.csv ${COMPOSER_BUCKET}
 
 ### Copy the dataset to be predicted. Replace with your own.
 ```
-gsutil cp clv_mle/to_predict.json ${BUCKET}/predictions/
-gsutil cp ${BUCKET}/predictions/to_predict.json ${COMPOSER_BUCKET}/predictions/
 gsutil cp clv_mle/to_predict.csv ${BUCKET}/predictions/
+gsutil cp clv_mle/to_predict.json ${BUCKET}/predictions/
 gsutil cp ${BUCKET}/predictions/to_predict.csv ${COMPOSER_BUCKET}/predictions/
-
+gsutil cp ${BUCKET}/predictions/to_predict.json ${COMPOSER_BUCKET}/predictions/
 ```
 
 ### Create BQ Table from CSV dataset

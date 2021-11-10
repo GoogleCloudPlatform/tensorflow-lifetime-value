@@ -31,6 +31,8 @@ export PATH=~/miniconda2/bin:$PATH
 conda create -y -n clv
 source activate clv
 conda install -y -n clv python=2.7 pip
+pip install pip-tools==5.5
+pip-compile requirements.in
 pip install -r requirements.txt
 ```
 

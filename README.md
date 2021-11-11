@@ -217,7 +217,10 @@ For example:
 
 ```
 cd ${LOCAL_FOLDER}/clv_automl
-python clv_automl.py --project_id [YOUR_PROJECT]
+python clv_automl.py --project_id ${PROJECT} \
+    --key_file ../mykey.json --bq_dataset ${DATASET_NAME} \
+    --batch_gcs_input ${BUCKET}/predictions/to_predict.csv
+    --batch_gcs_output ${BUCKET}/predictions
 ```
 
 ### TensorFlow DNN/Lifetimes

@@ -194,7 +194,6 @@ def create_parser():
   # required args
   parser.add_argument('--project_id',
                       help='Project id for project containing BQ data',
-                      default=KEY_FILE,
                       type=str,
                       required=True)
 

@@ -65,7 +65,7 @@ def create_automl_model(client,
           'input_uri': dataset_bq_input_uri}}
 
   print("Importing data...")
-  import_data_response = client.import_data(dataset_name, input_config)
+  import_data_response = client.import_data(dataset_name, input_config, timeout=30.0)
   while import_data_response.done() is False:
     time.sleep(1)
   print("Done")
@@ -116,7 +116,7 @@ def create_automl_model(client,
     }
   }
   print("Creating AutoML Tables model...")
-  create_model_response = client.create_model(location_path, model_dict)
+  create_model_response = client.create_model(location_path, model_dict, timeout=30.0)
   while create_model_response.done() is False:
     time.sleep(10)
   print("Done")

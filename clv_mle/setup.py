@@ -15,7 +15,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-REQUIRED_PACKAGES = ['sh', 'lifetimes==0.9.0.0', 'numpy==1.14.5', 'tensorflow==1.10']
+REQUIRED_PACKAGES = ['sh', 'lifetimes==0.9.0.0', 'numpy==1.14.5', 'tensorflow==2.5.3']
 
 setup(
     name='clv_ml_engine',

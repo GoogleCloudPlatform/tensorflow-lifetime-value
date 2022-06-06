@@ -274,41 +274,41 @@ gsutil cp ./run/airflow/gcs_datastore_transform.js ${COMPOSER_BUCKET}
 Region where things happen
 
 ```
-gcloud composer environments run ${COMPOSER_NAME} variables --location ${REGION} \
+gcloud composer environments run ${COMPOSER_NAME} --location ${REGION} variables set \
 -- \
---set region ${REGION}
+region ${REGION}
 ```
 
 Staging location for Dataflow
 
 ```
-gcloud composer environments run ${COMPOSER_NAME} variables --location ${REGION} \
+gcloud composer environments run ${COMPOSER_NAME} --location ${REGION} variables set \
 -- \
---set df_temp_location ${DF_STAGING}
+df_temp_location ${DF_STAGING}
 ```
 
 Zone where Dataflow should run
 
 ```
-gcloud composer environments run ${COMPOSER_NAME} variables --location ${REGION} \
+gcloud composer environments run ${COMPOSER_NAME} --location ${REGION} variables set \
 -- \
---set df_zone ${DF_ZONE}
+df_zone ${DF_ZONE}
 ```
 
 BigQuery working dataset
 
 ```
-gcloud composer environments run ${COMPOSER_NAME} variables --location ${REGION} \
+gcloud composer environments run ${COMPOSER_NAME} --location ${REGION} variables set \
 -- \
---set dataset ${DATASET_NAME}
+dataset ${DATASET_NAME}
 ```
 
 Composer bucket
 
 ```
-gcloud composer environments run ${COMPOSER_NAME} variables --location ${REGION} \
+gcloud composer environments run ${COMPOSER_NAME} --location ${REGION} variables set \
 -- \
---set composer_bucket_name ${COMPOSER_BUCKET_NAME}
+composer_bucket_name ${COMPOSER_BUCKET_NAME}
 ```
 
 #### (for AutoML Tables) Composer environment variables
@@ -316,25 +316,25 @@ gcloud composer environments run ${COMPOSER_NAME} variables --location ${REGION}
 AutoML Dataset name
 
 ```
-gcloud composer environments run ${COMPOSER_NAME} variables --location ${REGION} \
+gcloud composer environments run ${COMPOSER_NAME} --location ${REGION} variables set \
 -- \
---set automl_dataset "clv_solution"
+automl_dataset "clv_solution"
 ```
 
 AutoML Model name
 
 ```
-gcloud composer environments run ${COMPOSER_NAME} variables --location ${REGION} \
+gcloud composer environments run ${COMPOSER_NAME} --location ${REGION} variables set \
 -- \
---set automl_model "clv_model"
+automl_model "clv_model"
 ```
 
 AutoML training budget
 
 ```
-gcloud composer environments run ${COMPOSER_NAME} variables --location ${REGION} \
+gcloud composer environments run ${COMPOSER_NAME} --location ${REGION} variables set \
 -- \
---set automl_training_budget "1"
+automl_training_budget "1"
 ```
 
 #### (for AutoML Tables) Import AutoML libraries
@@ -397,7 +397,7 @@ Other variables are important as they depend on your environment and are passed 
 gcloud composer environments run ${COMPOSER_NAME} \
 --project ${PROJECT} \
 --location ${REGION} \
-trigger_dag \
+dags trigger \
 -- \
 build_train_deploy \
 --conf '{"model_type":"automl", "project":"'${PROJECT}'", "dataset":"'${DATASET_NAME}'", "threshold_date":"2011-08-08", "predict_end":"2011-12-12", "model_name":"clv_automl", "model_version":"v1", "tf_version":"1.10", "max_monetary":"15000"}'
@@ -407,7 +407,7 @@ build_train_deploy \
 gcloud composer environments run ${COMPOSER_NAME} \
 --project ${PROJECT} \
 --location ${REGION} \
-trigger_dag \
+dags trigger \
 -- \
 predict_serve \
 --conf '{"model_name":"clv_automl", "model_version":"v1", "dataset":"'${DATASET_NAME}'"}'

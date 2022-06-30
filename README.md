@@ -31,6 +31,8 @@ export PATH=~/miniconda2/bin:$PATH
 conda create -y -n clv
 source activate clv
 conda install -y -n clv python=2.7 pip
+pip install pip-tools==5.5
+pip-compile requirements.in
 pip install -r requirements.txt
 ```
 
@@ -39,6 +41,12 @@ pip install -r requirements.txt
 - Machine Learning API (for TensorFlow / Lifetimes models)
 - Dataflow API
 - AutoML Tables API (for AutoML Tables models)
+
+```
+list=()
+for service in composer ml dataflow automl; do; list+=(${service}.googleapis.com); done
+gcloud services enable "${list[@]}"
+```
 
 
 ### Environment setup
@@ -71,6 +79,10 @@ bq --location=US mk --dataset ${PROJECT}:${DATASET_NAME}
 ```
 
 Create a datastore database as detailed in the [Datastore documentation](https://cloud.google.com/datastore/docs/quickstart)
+```
+gcloud app create --region=$REGION
+gcloud datastore databases create --region $REGION
+```
 
 
 ### Copy the raw dataset
@@ -81,12 +93,29 @@ gsutil cp ${BUCKET}/db_dump.csv ${COMPOSER_BUCKET}
 
 ### Copy the dataset to be predicted. Replace with your own.
 ```
-gsutil cp clv_mle/to_predict.json ${BUCKET}/predictions/
-gsutil cp ${BUCKET}/predictions/to_predict.json ${COMPOSER_BUCKET}/predictions/
 gsutil cp clv_mle/to_predict.csv ${BUCKET}/predictions/
+gsutil cp clv_mle/to_predict.json ${BUCKET}/predictions/
 gsutil cp ${BUCKET}/predictions/to_predict.csv ${COMPOSER_BUCKET}/predictions/
-
+gsutil cp ${BUCKET}/predictions/to_predict.json ${COMPOSER_BUCKET}/predictions/
 ```
+
+### Create BQ Table from CSV dataset
+```
+bq load \
+--source_format=CSV \
+--autodetect \
+${DATASET_NAME}.data_source \
+${BUCKET}/db_dump.csv \
+./run/airflow/schema_source.json
+```
+
+### Clean & Aggregate BQ data tables
+1. 'data_source' -> [clean.sql](preparation/sql/common/clean.sql) -> 'data_cleaned'
+2. 'data_cleaned' -> [features_n_target.sql](preparation/sql/common/features_n_target.sql) -> 'features_n_target'
+3. 'data_cleaned' -> [benchmark.sql](preparation/sql/common/benchmark.sql) -> 'benchmark'
+4. 'features_n_target' -> [dnn/split_train.sql](preparation/sql/dnn/split_train.sql) -> 'dnn_train'
+5. 'features_n_target' -> [dnn/split_test.sql](preparation/sql/dnn/split_test.sql) -> 'dnn_test'
+6. 'features_n_target' -> [dnn/split_eval.sql](preparation/sql/dnn/split_eval.sql) -> 'dnn_eval'
 
 ### Create a service account
 Creating a service account is important to make sure that your Cloud Composer instance can perform the required tasks within BigQuery, AutoML Tables, ML Engine, Dataflow, Cloud Storage and Datastore.  It is also needed to run training for AutoML locally.
@@ -139,6 +168,10 @@ Wait until the service account has all the proper roles setup.
 ### Download API Key for AutoML Tables
 
 [Create a service account API key](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) and download the json keyfile to run training for AutoML locally.
+```
+gcloud iam service-accounts keys create mykey.json \
+    --iam-account=composer@${PROJECT}.iam.gserviceaccount.com
+```
 
 
 ### Upload Machine Learning Engine packaged file
@@ -184,7 +217,10 @@ For example:
 
 ```
 cd ${LOCAL_FOLDER}/clv_automl
-python clv_automl.py --project_id [YOUR_PROJECT]
+python clv_automl.py --project_id ${PROJECT} \
+    --key_file ../mykey.json --bq_dataset ${DATASET_NAME} \
+    --batch_gcs_input ${BUCKET}/predictions/to_predict.csv
+    --batch_gcs_output ${BUCKET}/predictions
 ```
 
 ### TensorFlow DNN/Lifetimes

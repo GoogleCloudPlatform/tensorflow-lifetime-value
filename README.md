@@ -65,8 +65,8 @@ export LOCAL_FOLDER=$(pwd)
 Creating the BigQuery workspace:
 
 ```
-gsutil mb -l ${REGION} -p ${PROJECT} ${BUCKET}
-gsutil mb -l ${REGION} -p ${PROJECT} ${COMPOSER_BUCKET}
+gcloud storage buckets create ${BUCKET} --location ${REGION} --project ${PROJECT}
+gcloud storage buckets create ${COMPOSER_BUCKET} --location ${REGION} --project ${PROJECT}
 bq --location=US mk --dataset ${PROJECT}:${DATASET_NAME}
 ```
 
@@ -75,16 +75,16 @@ Create a datastore database as detailed in the [Datastore documentation](https:/
 
 ### Copy the raw dataset
 ```
-gsutil cp gs://solutions-public-assets/ml-clv/db_dump.csv ${BUCKET}
-gsutil cp ${BUCKET}/db_dump.csv ${COMPOSER_BUCKET}
+gcloud storage cp gs://solutions-public-assets/ml-clv/db_dump.csv ${BUCKET}
+gcloud storage cp ${BUCKET}/db_dump.csv ${COMPOSER_BUCKET}
 ```
 
 ### Copy the dataset to be predicted. Replace with your own.
 ```
-gsutil cp clv_mle/to_predict.json ${BUCKET}/predictions/
-gsutil cp ${BUCKET}/predictions/to_predict.json ${COMPOSER_BUCKET}/predictions/
-gsutil cp clv_mle/to_predict.csv ${BUCKET}/predictions/
-gsutil cp ${BUCKET}/predictions/to_predict.csv ${COMPOSER_BUCKET}/predictions/
+gcloud storage cp clv_mle/to_predict.json ${BUCKET}/predictions/
+gcloud storage cp ${BUCKET}/predictions/to_predict.json ${COMPOSER_BUCKET}/predictions/
+gcloud storage cp clv_mle/to_predict.csv ${BUCKET}/predictions/
+gcloud storage cp ${BUCKET}/predictions/to_predict.csv ${COMPOSER_BUCKET}/predictions/
 
 ```
 
@@ -149,7 +149,7 @@ cd ${LOCAL_FOLDER}/clv_mle
 rm -rf clv_ml_engine.egg-info/
 rm -rf dist
 python setup.py sdist
-gsutil cp dist/* ${COMPOSER_BUCKET}/code/
+gcloud storage cp dist/* ${COMPOSER_BUCKET}/code/
 ```
 
 
@@ -196,7 +196,7 @@ Train the DNN model on local data:
 
 ```
 cd ${LOCAL_FOLDER}
-gsutil -m cp -r ${COMPOSER_BUCKET}/data .
+gcloud storage cp --recursive ${COMPOSER_BUCKET}/data .
 run/mltrain.sh local data
 ```
 
@@ -260,13 +260,13 @@ Some files are important when running the DAG. They need to be placed in the com
 
 ```
 cd ${LOCAL_FOLDER}
-gsutil cp ./run/airflow/schema_source.json ${COMPOSER_BUCKET}
+gcloud storage cp ./run/airflow/schema_source.json ${COMPOSER_BUCKET}
 ```
 
 2 - A Javascript file used by the Dataflow template for processing.
 
 ```
-gsutil cp ./run/airflow/gcs_datastore_transform.js ${COMPOSER_BUCKET}
+gcloud storage cp ./run/airflow/gcs_datastore_transform.js ${COMPOSER_BUCKET}
 ```
 
 #### Set Composer environment variables
